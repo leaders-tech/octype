@@ -6,7 +6,7 @@ Do not copy this file. Add demo apps in scenes.ts and their on-screen context in
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { REACH_DOWN_MS, TentacleCanvas, type ReachState, type TentacleLayout } from "../tentacles/TentacleCanvas";
-import { SCENES, type DemoStep } from "./scenes";
+import { SCENE_SOURCES, SCENES, type DemoStep } from "./scenes";
 import { DemoContext } from "./DemoScreens";
 import { nextChunk, nextWordEnd, suggest } from "./suggest";
 
@@ -56,7 +56,7 @@ export function GhostDemo() {
   const allKeyRef = useRef<HTMLButtonElement>(null);
   const reachRef = useRef<ReachState | null>(null);
 
-  const ghost = dismissed ? "" : suggest(typed, scene.candidates);
+  const ghost = dismissed ? "" : suggest(typed, SCENE_SOURCES[scene.id]);
   const full = typed + ghost;
   const visibleGhost = ghost && reveal.for === full ? full.slice(typed.length, Math.max(typed.length, reveal.end)) : "";
 

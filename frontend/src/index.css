@@ -28,7 +28,11 @@ Copy a section block here when you add another section and need its styles.
   --tentacle-front-sucker: rgba(255, 240, 242, 0.55);
   --tentacle-back-sucker: rgba(255, 222, 228, 0.32);
 
-  --band-bg: #161c2a;
+  --kb-body: #f3ede6;
+  --kb-line: rgba(29, 34, 51, 0.09);
+  --kb-key: #fcfaf7;
+  --kb-edge: rgba(29, 34, 51, 0.13);
+  --kb-label: rgba(29, 34, 51, 0.34);
   --mac-bg: #ffffff;
   --mac-ink: #1f2330;
   --mac-secondary: #7b7f8c;
@@ -67,7 +71,11 @@ Copy a section block here when you add another section and need its styles.
     --tentacle-front-sucker: rgba(255, 236, 238, 0.4);
     --tentacle-back-sucker: rgba(255, 222, 228, 0.22);
 
-    --band-bg: #0e131e;
+    --kb-body: #1c2334;
+    --kb-line: rgba(255, 255, 255, 0.07);
+    --kb-key: #242c3f;
+    --kb-edge: rgba(0, 0, 0, 0.35);
+    --kb-label: rgba(244, 239, 234, 0.32);
     --mac-bg: #22283a;
     --mac-ink: #eceef3;
     --mac-secondary: #9ba0ae;
@@ -274,18 +282,6 @@ section[id] {
   isolation: isolate;
 }
 
-.hero-glow {
-  position: absolute;
-  left: 50%;
-  bottom: -38%;
-  width: min(1100px, 130vw);
-  aspect-ratio: 1.6;
-  translate: -50% 0;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--coral) 32%, transparent), transparent);
-  filter: blur(20px);
-  z-index: -1;
-}
-
 .tentacles {
   position: absolute;
   inset: 0;
@@ -303,7 +299,7 @@ section[id] {
   z-index: 1;
   max-width: 1120px;
   margin: 0 auto;
-  padding: clamp(28px, 6vh, 80px) 16px 260px;
+  padding: clamp(28px, 6vh, 80px) 16px 290px;
   text-align: center;
 }
 
@@ -980,21 +976,26 @@ h2 {
 
 .app-points li {
   position: relative;
-  padding-left: 34px;
+  padding-left: 48px;
 }
 
-/* A little curled arm tip as the bullet. */
-.app-points li::before {
-  content: "";
+.tentacle-bullet {
   position: absolute;
   left: 0;
-  top: 6px;
-  width: 14px;
-  height: 14px;
-  border: 4px solid var(--coral);
-  border-right-color: transparent;
-  border-radius: 50%;
-  rotate: -40deg;
+  top: -4px;
+  width: 34px;
+  height: 34px;
+  color: var(--coral);
+  transform-origin: 30% 90%;
+  transition: rotate 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.tentacle-bullet circle {
+  fill: var(--tentacle-front-sucker);
+}
+
+.app-points li:hover .tentacle-bullet {
+  rotate: -12deg;
 }
 
 .app-points h3 {
@@ -1474,21 +1475,8 @@ h2 {
 
 .privacy {
   position: relative;
-  margin-top: clamp(90px, 12vw, 150px);
-  padding: clamp(90px, 12vw, 150px) 16px;
-  background: var(--band-bg);
-  color: #f4efea;
+  padding: clamp(80px, 11vw, 140px) 16px 0;
   overflow: hidden;
-  isolation: isolate;
-}
-
-.privacy::before {
-  content: "";
-  position: absolute;
-  inset: -20% 20% auto;
-  height: 70%;
-  background: radial-gradient(closest-side, rgba(236, 116, 130, 0.18), transparent);
-  z-index: -1;
 }
 
 .tentacles-privacy {
@@ -1503,19 +1491,11 @@ h2 {
   text-align: center;
 }
 
-.privacy .kicker {
-  color: #f59aa6;
-}
-
-.privacy h2 {
-  color: #fff;
-}
-
 .privacy-lead {
   max-width: 640px;
   margin: 0 auto;
   font-size: 18px;
-  color: rgba(244, 239, 234, 0.75);
+  color: var(--ink-2);
 }
 
 .promises {
@@ -1531,21 +1511,18 @@ h2 {
 .promises li {
   padding: 22px 24px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: var(--surface);
+  border: 1px solid var(--line);
 }
 
 .promises h3 {
   font-size: 17px;
-  color: #fff;
 }
 
 .promises p {
   margin-top: 4px;
   font-size: 15px;
-  color: rgba(244, 239, 234, 0.72);
+  color: var(--ink-2);
 }
 
 @media (max-width: 640px) {

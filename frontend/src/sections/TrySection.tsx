@@ -19,8 +19,8 @@ export function TrySection() {
       </div>
       <GhostDemo />
       <p className="footnote">
-        This demo runs a small scripted imitation in your browser. The real Octype writes fresh suggestions with a language model on your Mac, using what's on
-        your screen.
+        No AI runs on this page: the demo picks from replies written for each scene, so it only knows these three conversations. The real Octype writes fresh
+        suggestions with a language model on your Mac, using what's on your screen.
       </p>
     </section>
   );

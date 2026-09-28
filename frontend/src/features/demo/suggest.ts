@@ -1,29 +1,20 @@
 /*
 This file is the tiny, fake "model" behind the website demo: it finds a gray suggestion for the typed text.
-Edit this file when the demo should suggest differently or accept text in bigger or smaller steps.
-Do not copy this file. Add new demo phrases to scenes.ts instead.
-Octype itself runs a real language model on the Mac; this file only imitates how that feels.
+There is no AI on the website. Suggestions come only from sentences written for the scene on screen (scenes.ts),
+so they always fit the chat, email, or note the visitor sees.
+Edit this file when the demo should match typed text differently or accept text in bigger or smaller steps.
+Do not copy this file. Add demo phrases to scenes.ts instead.
 */
 
+/** Short neutral replies that fit any scene; each scene adds its own sentences before these. */
 export const COMMON_SENTENCES = [
-  "Thank you so much for your help!",
-  "Thanks for the update!",
-  "Thanks, that works for me.",
-  "Let me check and get back to you.",
-  "Let me know if you have any questions.",
-  "Looking forward to it!",
+  "Thanks!",
+  "Thank you!",
   "Sounds good to me.",
-  "Sorry for the late reply.",
-  "Could you send me the details?",
-  "Can we talk about it tomorrow?",
-  "I'll send it over by the end of the day.",
-  "I think that's a great idea.",
-  "Have a great weekend!",
-  "Happy birthday! Hope you have an amazing day.",
-  "What do you think?",
+  "Let me check and get back to you.",
+  "Looking forward to it!",
   "No worries at all.",
-  "See you soon!",
-  "Octype is typing this for me.",
+  "What do you think?",
 ];
 
 export const COMMON_WORDS = [
@@ -52,7 +43,6 @@ export const COMMON_WORDS = [
   "believe",
   "better",
   "between",
-  "birthday",
   "book",
   "business",
   "calendar",
@@ -226,35 +216,114 @@ export const COMMON_WORDS = [
   "your",
 ];
 
-/** Returns the gray text to show after `typed`, or "" when there is nothing good to suggest. */
-export function suggest(typed: string, candidates: readonly string[], sentences: readonly string[] = COMMON_SENTENCES): string {
-  if (!typed.trim()) return "";
-  const lower = typed.toLowerCase();
+type Word = { text: string; lower: string; start: number; end: number };
 
-  // 1. A whole message this scene expects, e.g. a reply to the chat on screen.
-  for (const candidate of candidates) {
-    if (candidate.length > typed.length && candidate.toLowerCase().startsWith(lower)) {
-      return candidate.slice(typed.length);
+const WORD = /[\p{L}\p{N}']+/gu;
+const SENTENCE_END = /[.!?\n]/;
+
+function words(text: string): Word[] {
+  return [...text.matchAll(WORD)].map((m) => ({ text: m[0], lower: m[0].toLowerCase(), start: m.index, end: m.index + m[0].length }));
+}
+
+const cache = new WeakMap<readonly string[], { words: Word[][]; vocabulary: string[] }>();
+
+function prepare(sources: readonly string[]) {
+  let prepared = cache.get(sources);
+  if (!prepared) {
+    const vocabulary = new Set<string>();
+    const split = sources.map((source) => {
+      const ws = words(source);
+      for (const w of ws) if (w.lower.length >= 3 && !/\d/.test(w.lower)) vocabulary.add(w.lower);
+      return ws;
+    });
+    for (const w of COMMON_WORDS) vocabulary.add(w);
+    prepared = { words: split, vocabulary: [...vocabulary] };
+    cache.set(sources, prepared);
+  }
+  return prepared;
+}
+
+/**
+ * If `typedWords` match the source's words starting at index `j`, return the rest of the source after them.
+ * The last typed word may be unfinished ("Ram" matches "Ramen"). Spaces and punctuation typed after the last word
+ * must agree with the source, except that a plain space may stand in for the source's comma or period.
+ */
+function continueFrom(typed: string, typedWords: Word[], source: string, sourceWords: Word[], j: number): string | null {
+  const k = typedWords.length;
+  const last = typedWords[k - 1];
+  const trail = typed.slice(last.end);
+  for (let i = 0; i < k; i++) {
+    const s = sourceWords[j + i];
+    if (!s) return null;
+    const t = typedWords[i];
+    const unfinished = i === k - 1 && trail === "";
+    if (unfinished ? !s.lower.startsWith(t.lower) : s.lower !== t.lower) return null;
+  }
+  const matched = sourceWords[j + k - 1];
+  if (trail === "") {
+    const rest = source.slice(matched.start + last.text.length);
+    return rest.trim() ? rest : null;
+  }
+  const rest = source.slice(matched.end);
+  const lead = rest.match(/^[^\p{L}\p{N}']*/u)?.[0] ?? "";
+  let out: string | null = null;
+  if (!trail.trim()) out = rest.slice(lead.length);
+  else if (lead.startsWith(trail)) out = rest.slice(trail.length);
+  return out && out.trim() ? out : null;
+}
+
+/**
+ * Returns the gray text to show after `typed`, or "" when nothing fits. `sources` are the sentences that make sense
+ * in the current scene, best first. Tried in order:
+ *   1. a source that starts with everything typed so far;
+ *   2. a source sentence that starts like the sentence being typed now;
+ *   3. a source that contains the last 4, 3 or 2 typed words, continued from there;
+ *   4. finishing the current word.
+ */
+export function suggest(typed: string, sources: readonly string[]): string {
+  if (!typed.trim()) return "";
+
+  const lower = typed.toLowerCase();
+  for (const source of sources) {
+    if (source.length > typed.length && source.toLowerCase().startsWith(lower)) return source.slice(typed.length);
+  }
+
+  const typedWords = words(typed);
+  if (!typedWords.length) return "";
+  const tail = typed.slice(typedWords[typedWords.length - 1].end);
+  // A finished sentence ("Sure! ") gives nothing to continue that step 1 did not already try.
+  if (SENTENCE_END.test(tail)) return "";
+
+  let first = typedWords.length - 1;
+  while (first > 0 && !SENTENCE_END.test(typed.slice(typedWords[first - 1].end, typedWords[first].start))) first--;
+  const sentence = typedWords.slice(first);
+  const prepared = prepare(sources);
+
+  for (let s = 0; s < sources.length; s++) {
+    const sw = prepared.words[s];
+    for (let j = 0; j < sw.length; j++) {
+      const startsSentence = j === 0 || SENTENCE_END.test(sources[s].slice(sw[j - 1].end, sw[j].start));
+      if (!startsSentence) continue;
+      const out = continueFrom(typed, sentence, sources[s], sw, j);
+      if (out) return out;
     }
   }
 
-  // 2. A common sentence that starts like the one being typed now.
-  const sentence = typed.match(/(?:^|[.!?\n]\s+|\n)([^.!?\n]*)$/)?.[1] ?? "";
-  if (sentence.trim()) {
-    const sentenceLower = sentence.toLowerCase();
-    for (const candidate of sentences) {
-      if (candidate.length > sentence.length && candidate.toLowerCase().startsWith(sentenceLower)) {
-        return candidate.slice(sentence.length);
+  for (let k = Math.min(4, sentence.length); k >= 2; k--) {
+    const recent = sentence.slice(-k);
+    for (let s = 0; s < sources.length; s++) {
+      const sw = prepared.words[s];
+      for (let j = 0; j < sw.length; j++) {
+        const out = continueFrom(typed, recent, sources[s], sw, j);
+        if (out) return out;
       }
     }
   }
 
-  // 3. Finish the current word.
-  const word = typed.match(/(?:^|[^A-Za-z'])([A-Za-z']{2,})$/)?.[1];
-  if (word) {
-    const wordLower = word.toLowerCase();
-    const match = COMMON_WORDS.find((w) => w.length > word.length && w.startsWith(wordLower));
-    if (match) return match.slice(word.length);
+  const last = typedWords[typedWords.length - 1];
+  if (tail === "" && last.text.length >= 2 && !/\d/.test(last.text)) {
+    const match = prepared.vocabulary.find((w) => w.length > last.lower.length && w.startsWith(last.lower));
+    if (match) return match.slice(last.lower.length);
   }
   return "";
 }

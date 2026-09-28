@@ -3,7 +3,10 @@
 - This repo is the landing site for Octype (inline autocomplete for macOS, source at github.com/levbern/Octype).
   It started from the `templatePWA` template: keep its infrastructure, but there is no login, database, or websocket.
 - The backend only serves `/api/health` and `/api/release/latest` (the newest GitHub release, cached for 10 minutes).
-- The octopus arm animation lives in `frontend/src/features/tentacles`; the fake autocomplete demo in `frontend/src/features/demo`.
+- The hero octopus lives in `frontend/src/features/octopus`, the shared arm math and canvas loop in
+  `frontend/src/features/tentacles`, and the fake autocomplete demo in `frontend/src/features/demo`.
+- There is no AI model on the site. Demo suggestions only come from the sentences in `features/demo/scenes.ts`;
+  when adding a scene, write enough on-topic sentences that free typing gets sensible suggestions.
 
 - The main user of this template is a school student who does not understand the technology deeply yet.
 - Keep the template small and easy to read.

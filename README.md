@@ -8,10 +8,14 @@ model (Qwen3 via llama.cpp) runs entirely on the Mac, so nothing you type leaves
 
 The page explains what Octype does and lets visitors try it:
 
-- **Octopus arms** — procedural canvas tentacles (forward kinematics + FABRIK reach) fan out under the hero like the
-  app icon, lean toward the pointer, and one arm presses the Tab key in the demo.
+- **Typing octopus** — under the hero an octopus sits behind a keyboard: six procedural canvas arms (forward
+  kinematics + FABRIK reach) wave and lean toward the pointer, two type. It presses Tab exactly when the headline
+  accepts a word, and its eyes follow the pointer. Loose arms also curl in around the privacy section, one presses
+  Tab in the demo, and the list bullets are tiny rolled-up arms drawn with the same code.
 - **Try it** — a pretend Mac desktop (Messages, Mail, Notes) with a real text field: gray suggestions stream in word
   by word; `Tab`, `⇧ Tab`, `⌥ →` and `Esc` work like in the app. Autoplay runs until you click the field.
+  No AI runs on the site: suggestions come from sentences written for each scene (`features/demo/scenes.ts`),
+  matched by sentence start, by the last few typed words, then by word completion.
 - **The app** — the Octype window (Overview, Statistics, Model, Personalization) rebuilt for the web with sample data.
 - **Download** — buttons point straight at the newest `.dmg`, looked up by the backend from GitHub releases.
 
@@ -24,7 +28,8 @@ backend/                 aiohttp: /api/health and /api/release/latest (cached Gi
 frontend/src/
   app/App.tsx            the page, section by section
   sections/              Nav, Hero, Try it, How it works, The app, Features, Privacy, Install, FAQ, Footer
-  features/tentacles/    canvas octopus arms (math in tentacle.ts, layouts per section)
+  features/octopus/      the hero octopus: body, eyes, keyboard, typing (heroScene.ts)
+  features/tentacles/    arm math (tentacle.ts), the shared canvas loop, loose arms per section, spiral bullets
   features/demo/         the fake autocomplete demo and its scenes
   features/showcase/     the pretend Octype app window
   features/hero/         the self-completing headline

@@ -6,6 +6,7 @@ Do not copy this file. The real demo lives in features/demo.
 
 import { useEffect, useState } from "react";
 import { nextWordEnd } from "../demo/suggest";
+import { HERO_KEY_TRAVEL_MS, pressHeroKey } from "../octopus/heroKeys";
 
 const HEADLINE_PHRASES = ["everything you type.", "every app on your Mac.", "every chat and email."];
 
@@ -43,6 +44,10 @@ export function HeroHeadline() {
         // Accept it with Tab, word by word.
         for (let end = 0; end < text.length && !cancelled; ) {
           end = nextWordEnd(text, end);
+          // The octopus reaches for Tab first; the word turns solid when its arm lands on the key.
+          pressHeroKey("tab");
+          await sleep(HERO_KEY_TRAVEL_MS);
+          if (cancelled) return;
           setTab(true);
           setAccepted(end);
           await sleep(140);
@@ -50,7 +55,9 @@ export function HeroHeadline() {
           await sleep(300);
         }
         await sleep(2600);
-        // Backspace it away before the next phrase.
+        // Backspace it away before the next phrase, with the octopus holding delete.
+        pressHeroKey("delete", text.length * 20);
+        await sleep(HERO_KEY_TRAVEL_MS);
         for (let end = text.length; end >= 0 && !cancelled; end--) {
           setAccepted(end);
           setShown(end);

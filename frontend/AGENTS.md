@@ -22,7 +22,8 @@
 
 - The site is one page. `src/app/App.tsx` lists the sections; each section is a file in `src/sections/`.
 - Interactive pieces live in `src/features/<feature>/` with a `.test.ts(x)` next to them:
-  `tentacles` (canvas octopus arms), `demo` (fake autocomplete), `showcase` (the pretend app window),
+  `octopus` (hero octopus at the keyboard), `tentacles` (arm math, canvas loop, loose arms, spiral bullets),
+  `demo` (fake autocomplete), `showcase` (the pretend app window),
   `hero` (animated headline), `release` (latest download link).
 - TypeScript types shared across files belong in `src/shared/types.ts` — add new types there.
 - Add a new section to `src/app/App.tsx` whenever you add a new section file.
@@ -36,8 +37,9 @@
 
 ## Animations
 
-- Every animation must respect `prefers-reduced-motion` and pause when off screen (see `TentacleCanvas.tsx`).
-- Canvas colors come from CSS variables (`--tentacle-*`), so dark mode stays in `src/index.css`.
+- Every animation must respect `prefers-reduced-motion` and pause when off screen; build canvas animations on
+  `useCanvasScene` in `features/tentacles/useCanvasScene.ts`, which handles both.
+- Canvas colors come from CSS variables (`--tentacle-*`, `--kb-*`), so dark mode stays in `src/index.css`.
 
 ## Tests — always keep them green
 

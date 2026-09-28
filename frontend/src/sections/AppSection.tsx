@@ -5,6 +5,7 @@ Do not copy this file. The window itself lives in features/showcase.
 */
 
 import { AppWindow } from "../features/showcase/AppWindow";
+import { TentacleBullet } from "../features/tentacles/TentacleBullet";
 
 const POINTS = [
   ["Lives in the menu bar", "Pause for an hour, or switch Octype off for the app you're in, right from the octopus icon."],
@@ -24,8 +25,9 @@ export function AppSection() {
       <div className="app-showcase">
         <AppWindow />
         <ul className="app-points">
-          {POINTS.map(([title, text]) => (
+          {POINTS.map(([title, text], i) => (
             <li key={title}>
+              <TentacleBullet seed={i} />
               <h3>{title}</h3>
               <p>{text}</p>
             </li>

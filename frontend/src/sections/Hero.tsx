@@ -1,21 +1,19 @@
 /*
-This file is the first screen: the animated headline, what Octype is, the download button, and the octopus arms.
-Edit this file when the main pitch, the hero buttons, or the hero arms change.
+This file is the first screen: the animated headline, what Octype is, the download button, and the typing octopus.
+Edit this file when the main pitch or the hero buttons change.
 Do not copy this file. There is one hero for the whole page.
 */
 
 import { HeroHeadline } from "../features/hero/HeroHeadline";
 import { downloadHref, formatSize } from "../features/release/useLatestRelease";
-import { heroLayout } from "../features/tentacles/layouts";
-import { TentacleCanvas } from "../features/tentacles/TentacleCanvas";
+import { HeroOctopus } from "../features/octopus/HeroOctopus";
 import type { Release } from "../shared/types";
 
 export function Hero({ release }: { release: Release }) {
   const size = formatSize(release.dmg_size);
   return (
     <section className="hero" id="top">
-      <div className="hero-glow" aria-hidden="true" />
-      <TentacleCanvas layout={heroLayout} interactive className="tentacles-hero" />
+      <HeroOctopus />
       <div className="hero-inner">
         <p className="pill">
           <span className="pill-dot" /> Free for Mac{release.version ? ` · v${release.version}` : ""} · runs 100% on your Mac
