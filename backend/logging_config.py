@@ -1,4 +1,4 @@
-"""Configure small stdout logs for backend startup, requests, and websocket events.
+"""Configure small stdout logs for backend startup, requests, and release lookups.
 
 Edit this file when backend log format, levels, or logger names change.
 Do not copy this file. Change it when the shared backend logging model changes.

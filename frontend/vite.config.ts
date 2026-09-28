@@ -7,7 +7,6 @@ Copy a config pattern here when you add another shared frontend build setting.
 import { defineConfig } from "vitest/config";
 import { createLogger, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
@@ -31,28 +30,27 @@ export default defineConfig(({ mode }) => {
     customLogger: logger,
     plugins: [
       react(),
-      tailwindcss(),
       VitePWA({
         registerType: "autoUpdate",
         manifest: {
-          name: "Template PWA",
-          short_name: "TemplatePWA",
-          description: "Small starter app for school projects.",
-          theme_color: "#0e1a2b",
-          background_color: "#eff6ff",
+          name: "Octype",
+          short_name: "Octype",
+          description: "Autocomplete for everything you type on your Mac.",
+          theme_color: "#ec7482",
+          background_color: "#fdfbf8",
           display: "standalone",
           start_url: "/",
           icons: [
             {
-              src: "/pwa-192.svg",
+              src: "/pwa-192.png",
               sizes: "192x192",
-              type: "image/svg+xml",
+              type: "image/png",
               purpose: "any",
             },
             {
-              src: "/pwa-512.svg",
+              src: "/pwa-512.png",
               sizes: "512x512",
-              type: "image/svg+xml",
+              type: "image/png",
               purpose: "any",
             },
           ],

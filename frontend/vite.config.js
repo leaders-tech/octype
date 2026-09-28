@@ -17,7 +17,6 @@ var __assign = (this && this.__assign) || function () {
 import { defineConfig } from "vitest/config";
 import { createLogger, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig(function (_a) {
     var _b;
@@ -26,8 +25,7 @@ export default defineConfig(function (_a) {
     var proxyTarget = (_b = env.VITE_DEV_PROXY_TARGET) === null || _b === void 0 ? void 0 : _b.trim();
     var baseLogger = createLogger();
     var logger = __assign(__assign({}, baseLogger), { error: function (message, options) {
-            var isKnownWsDisconnect = (message.includes("ws proxy error:") || message.includes("ws proxy socket error:")) &&
-                (message.includes("EPIPE") || message.includes("ECONNRESET"));
+            var isKnownWsDisconnect = (message.includes("ws proxy error:") || message.includes("ws proxy socket error:")) && (message.includes("EPIPE") || message.includes("ECONNRESET"));
             if (isKnownWsDisconnect) {
                 return;
             }
@@ -37,28 +35,27 @@ export default defineConfig(function (_a) {
         customLogger: logger,
         plugins: [
             react(),
-            tailwindcss(),
             VitePWA({
                 registerType: "autoUpdate",
                 manifest: {
-                    name: "Template PWA",
-                    short_name: "TemplatePWA",
-                    description: "Small starter app for school projects.",
-                    theme_color: "#0e1a2b",
-                    background_color: "#eff6ff",
+                    name: "Octype",
+                    short_name: "Octype",
+                    description: "Autocomplete for everything you type on your Mac.",
+                    theme_color: "#ec7482",
+                    background_color: "#fdfbf8",
                     display: "standalone",
                     start_url: "/",
                     icons: [
                         {
-                            src: "/pwa-192.svg",
+                            src: "/pwa-192.png",
                             sizes: "192x192",
-                            type: "image/svg+xml",
+                            type: "image/png",
                             purpose: "any",
                         },
                         {
-                            src: "/pwa-512.svg",
+                            src: "/pwa-512.png",
                             sizes: "512x512",
-                            type: "image/svg+xml",
+                            type: "image/png",
                             purpose: "any",
                         },
                     ],

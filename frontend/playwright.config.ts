@@ -28,9 +28,7 @@ const frontendHost = requireEnv("E2E_FRONTEND_HOST");
 const frontendPort = requireEnv("E2E_FRONTEND_PORT");
 const backendUrl = `http://${backendHost}:${backendPort}`;
 const frontendUrl = `http://${frontendHost}:${frontendPort}`;
-const dbDir = process.env.E2E_DB_DIR?.trim() || os.tmpdir();
-const dbPath = process.env.E2E_DB_PATH?.trim() || path.join(dbDir, `templatepwa-e2e-${Date.now()}-${process.pid}.sqlite3`);
-const uvCacheDir = path.join(os.tmpdir(), "templatepwa-uv-cache");
+const uvCacheDir = path.join(os.tmpdir(), "octype-site-uv-cache");
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -47,8 +45,6 @@ export default defineConfig({
         APP_MODE: "dev",
         APP_HOST: backendHost,
         APP_PORT: backendPort,
-        DB_PATH: dbPath,
-        COOKIE_SECRET: requireEnv("E2E_COOKIE_SECRET"),
         FRONTEND_ORIGIN: frontendUrl,
         UV_CACHE_DIR: uvCacheDir,
       },

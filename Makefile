@@ -23,8 +23,6 @@ AGENT_RUNTIME_DIR_ABS := $(shell python3 -c 'from pathlib import Path; print(Pat
 AGENT_COOKIE_JAR := $(AGENT_RUNTIME_DIR_ABS)/cookies.txt
 AGENT_BACKEND_PID := $(AGENT_RUNTIME_DIR_ABS)/backend.pid
 AGENT_FRONTEND_PID := $(AGENT_RUNTIME_DIR_ABS)/frontend.pid
-ALOGIN_USER := $(if $(filter command line,$(origin USER)),$(USER),user)
-ALOGIN_PASS := $(if $(filter command line,$(origin PASS)),$(PASS),user)
 APOST_BODY := $(if $(filter command line,$(origin BODY)),$(BODY),{})
 PY_RUNTIME_DEPS := $(shell python3 -c 'import re, tomllib, pathlib; data = tomllib.loads(pathlib.Path("pyproject.toml").read_text()); print(" ".join(re.match(r"[A-Za-z0-9._-]+", dep).group(0) for dep in data["project"]["dependencies"]))')
 PY_DEV_DEPS := $(shell python3 -c 'import re, tomllib, pathlib; data = tomllib.loads(pathlib.Path("pyproject.toml").read_text()); print(" ".join(re.match(r"[A-Za-z0-9._-]+", dep).group(0) for dep in data["dependency-groups"]["dev"]))')
@@ -33,7 +31,7 @@ CHECK_DOCKER_ENV = @test -f .docker.env || (echo "Docker config file .docker.env
 CHECK_AGENT_ENV = @test -f .agent.env || (echo "Agent config file .agent.env was not found. Run make setup first."; exit 1)
 CHECK_WIFI_IP = @test -n "$(WIFI_IP)" || (echo "Wi-Fi IP was not found on $(WIFI_INTERFACE). Connect to Wi-Fi or use normal make back / make front."; exit 1)
 
-.PHONY: help setup back back-once front open back-lan front-lan open-lan back-docker front-docker open-docker stop-docker clean-docker format test test-e2e-docker deps-update-safe deps-update-latest aback aback-once afront aopen astop aclean abrowser alogin apost ahealth asql adb-path
+.PHONY: help setup back back-once front open back-lan front-lan open-lan back-docker front-docker open-docker stop-docker clean-docker format test test-e2e-docker deps-update-safe deps-update-latest aback aback-once afront aopen astop aclean abrowser apost ahealth
 
 help:
 	@printf "Available commands:\n"
@@ -100,18 +98,16 @@ aback:
 	$(CHECK_AGENT_ENV)
 	mkdir -p "$(AGENT_RUNTIME_DIR_ABS)"
 	./scripts/kill_port.sh "$(AGENT_BACKEND_PORT)"
-	uv run python ./scripts/agent_db_snapshot.py
 	echo $$$$ > "$(AGENT_BACKEND_PID)"; \
-	exec env APP_MODE=$(APP_MODE) APP_DEBUG_LOGS=$(APP_DEBUG_LOGS) APP_HOST=$(AGENT_BACKEND_HOST) APP_PORT=$(AGENT_BACKEND_PORT) DB_PATH=$(AGENT_DB_PATH) COOKIE_SECRET=$(AGENT_COOKIE_SECRET) FRONTEND_ORIGIN=$(AGENT_FRONTEND_URL) uv run python -m backend.dev
+	exec env APP_MODE=$(APP_MODE) APP_DEBUG_LOGS=$(APP_DEBUG_LOGS) APP_HOST=$(AGENT_BACKEND_HOST) APP_PORT=$(AGENT_BACKEND_PORT) FRONTEND_ORIGIN=$(AGENT_FRONTEND_URL) uv run python -m backend.dev
 
 aback-once:
 	$(CHECK_LOCAL_ENV)
 	$(CHECK_AGENT_ENV)
 	mkdir -p "$(AGENT_RUNTIME_DIR_ABS)"
 	./scripts/kill_port.sh "$(AGENT_BACKEND_PORT)"
-	uv run python ./scripts/agent_db_snapshot.py
 	echo $$$$ > "$(AGENT_BACKEND_PID)"; \
-	exec env APP_MODE=$(APP_MODE) APP_DEBUG_LOGS=$(APP_DEBUG_LOGS) APP_HOST=$(AGENT_BACKEND_HOST) APP_PORT=$(AGENT_BACKEND_PORT) DB_PATH=$(AGENT_DB_PATH) COOKIE_SECRET=$(AGENT_COOKIE_SECRET) FRONTEND_ORIGIN=$(AGENT_FRONTEND_URL) uv run python -m backend.main
+	exec env APP_MODE=$(APP_MODE) APP_DEBUG_LOGS=$(APP_DEBUG_LOGS) APP_HOST=$(AGENT_BACKEND_HOST) APP_PORT=$(AGENT_BACKEND_PORT) FRONTEND_ORIGIN=$(AGENT_FRONTEND_URL) uv run python -m backend.main
 
 afront:
 	$(CHECK_AGENT_ENV)
@@ -141,12 +137,6 @@ abrowser:
 	mkdir -p "$(AGENT_RUNTIME_DIR_ABS)"
 	cd frontend && node ./scripts/agent_browser_runner.mjs "$(SCRIPT)"
 
-alogin:
-	$(CHECK_AGENT_ENV)
-	mkdir -p "$(AGENT_RUNTIME_DIR_ABS)"
-	BODY="$$(python3 -c 'import json, sys; print(json.dumps({"username": sys.argv[1], "password": sys.argv[2]}))' "$(ALOGIN_USER)" "$(ALOGIN_PASS)")"; \
-	curl -sS -c "$(AGENT_COOKIE_JAR)" -b "$(AGENT_COOKIE_JAR)" -H "Origin: $(AGENT_FRONTEND_URL)" -H "Content-Type: application/json" -X POST "$(AGENT_BACKEND_URL)/api/auth/login" --data "$$BODY"
-
 apost:
 	$(CHECK_AGENT_ENV)
 	@test -n "$(API_PATH)" || (echo "Missing API_PATH=/api/... for make apost."; exit 1)
@@ -156,15 +146,6 @@ apost:
 ahealth:
 	$(CHECK_AGENT_ENV)
 	curl -fsS "$(AGENT_BACKEND_URL)/api/health"
-
-asql:
-	$(CHECK_AGENT_ENV)
-	@test -n "$(SQL)" || (echo "Missing SQL='select ...' for make asql."; exit 1)
-	uv run python ./scripts/agent_sql.py "$(SQL)"
-
-adb-path:
-	$(CHECK_AGENT_ENV)
-	python3 -c 'from pathlib import Path; print(Path("$(AGENT_DB_PATH)").resolve())'
 
 back-docker:
 	$(CHECK_DOCKER_ENV)

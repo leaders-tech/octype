@@ -1,6 +1,6 @@
 /*
-This file sends frontend JSON requests to the backend and builds the websocket base URL.
-Edit this file when API path rules, websocket URL rules, shared fetch behavior, or API error parsing changes.
+This file sends frontend JSON requests to the backend.
+Edit this file when API path rules, shared fetch behavior, or API error parsing changes.
 Copy the helper pattern here when you add another shared browser API helper.
 */
 
@@ -57,9 +57,4 @@ export async function postJson<T>(path: string, body: unknown = {}): Promise<T> 
     throw new ApiError(response.status, payload.error.code, payload.error.message);
   }
   return payload.data;
-}
-
-export function getWsUrl(): string {
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}/ws`;
 }

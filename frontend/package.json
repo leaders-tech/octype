@@ -1,5 +1,5 @@
 {
-  "name": "templatepwa-frontend",
+  "name": "octype-site-frontend",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -14,11 +14,11 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.13",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/manrope": "^5.3.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.8.2",
-    "tailwindcss": "^4.1.13"
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",

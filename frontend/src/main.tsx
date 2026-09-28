@@ -1,14 +1,15 @@
 /*
-This file starts the React app and wraps it with the router and auth provider.
-Edit this file when app-wide providers or startup behavior changes.
+This file starts the React app, loads the self-hosted fonts, and registers the offline service worker.
+Edit this file when app-wide startup behavior changes.
 Do not copy this file. Change it when the whole frontend app bootstrap changes.
 */
 
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import "@fontsource-variable/fraunces/soft.css";
+import "@fontsource-variable/manrope";
+import "@fontsource-variable/jetbrains-mono";
 import { App } from "./app/App";
-import { AuthProvider } from "./app/auth";
 import "./index.css";
 
 if ("serviceWorker" in navigator) {
@@ -17,10 +18,6 @@ if ("serviceWorker" in navigator) {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
+    <App />
   </React.StrictMode>,
 );

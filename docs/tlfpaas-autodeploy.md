@@ -8,14 +8,13 @@ by this template.
 
 ## Current Deployment Shape
 
-`templatePWA` is a same-origin app with two public services:
+This site (built from `templatePWA`) is a same-origin app with two public services:
 
 - `frontend` serves the built React app through nginx on port `8080`;
-- `backend` serves JSON APIs and WebSocket on port `8081`;
+- `backend` serves JSON APIs on port `8081` (no WebSocket today, but `/ws` stays reserved for it);
 - Caddy/tlfpaas routes `/api*` and `/ws*` to `backend`;
 - Caddy/tlfpaas routes everything else to `frontend`;
-- SQLite data lives under `/data` in the backend container;
-- `/data` is backed by the `sqlite_data` named volume.
+- the backend keeps no data: there is no database and no volume.
 
 The base `docker-compose.yml` is the production/tlfpaas-safe file. Local-only
 browser gateway behavior lives in `docker-compose.local.yml`.
@@ -94,7 +93,7 @@ Backend:
 - listen on `0.0.0.0`;
 - keep Docker `APP_PORT=8081`;
 - keep `USER app` in the final stage;
-- write persistent SQLite data under `/data`;
+- if persistent data is ever added, write it under `/data` and back it with a named volume;
 - write temporary files only to `/tmp` or `/data`.
 
 Do not solve non-root runtime requirements by adding Compose `user`. tlfpaas
@@ -109,14 +108,12 @@ Current important values:
 
 ```env
 APP_MODE=dev
-DB_PATH=/data/app.sqlite3
 FRONTEND_ORIGIN=http://localhost:5105
 VITE_BACKEND_URL=/api
 ```
 
-`COOKIE_SECRET=local-docker-secret` is only a local placeholder. In tlfpaas
-production, configure `COOKIE_SECRET` in the student Secrets UI and click
-`Redeploy now`.
+The site needs no secrets. If one is ever added, configure it in the tlfpaas
+Secrets UI and click `Redeploy now`; never commit it.
 
 If adding frontend build-time config, use only public client-visible prefixes:
 
@@ -197,8 +194,6 @@ These values are part of the deployment contract:
 - frontend API base path: `VITE_BACKEND_URL=/api`;
 - backend API route prefix: `/api/...`;
 - backend WebSocket path: `/ws`;
-- backend data path: `/data/app.sqlite3`;
-- named volume: `sqlite_data:/data`;
 - route labels: `tlfpaas.route: "frontend"` and `tlfpaas.route: "backend"`;
 - final Dockerfile users: `USER nginx` and `USER app`.
 

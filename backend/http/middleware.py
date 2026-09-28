@@ -1,4 +1,4 @@
-"""Apply shared backend middleware such as errors, CORS, and origin checks.
+"""Apply shared backend middleware such as errors, CORS, and request logs.
 
 Edit this file when request-wide backend rules change.
 Copy the helper style here when you add another small shared middleware helper.
@@ -16,7 +16,6 @@ from backend.http.json_api import AppError, fail
 
 ERROR_LOGGER = logging.getLogger("backend.error")
 REQUEST_LOGGER = logging.getLogger("backend.request")
-EXPECTED_ANONYMOUS_401_PATHS = {"/api/auth/me", "/api/auth/refresh"}
 
 
 def add_cors_headers(request: web.Request, response: web.StreamResponse) -> web.StreamResponse:
@@ -52,12 +51,8 @@ async def request_logging_middleware(request: web.Request, handler):
     response = await handler(request)
     settings: Settings = request.app["settings"]
     duration_ms = round((perf_counter() - started_at) * 1000)
-    user = request.get("current_user")
-    user_part = f" user={user['id']}" if isinstance(user, dict) and "id" in user else ""
-    message = f"{request.method} {request.path} {response.status} {duration_ms}ms{user_part}"
+    message = f"{request.method} {request.path} {response.status} {duration_ms}ms"
 
-    if response.status == 401 and request.path in EXPECTED_ANONYMOUS_401_PATHS and user is None:
-        return response
     if response.status >= 500:
         REQUEST_LOGGER.error(message)
     elif settings.debug_logs:
@@ -72,14 +67,3 @@ async def cors_middleware(request: web.Request, handler):
     else:
         response = await handler(request)
     return add_cors_headers(request, response)
-
-
-def require_allowed_origin(request: web.Request) -> None:
-    settings: Settings = request.app["settings"]
-    origin = request.headers.get("Origin")
-    # This is only a small same-site check when Origin is present. SameSite=Lax cookies and JSON-only POST endpoints
-    # are the main simplified CSRF barrier in this template, not this helper alone.
-    if origin is None:
-        return
-    if origin.rstrip("/") not in settings.allowed_origins:
-        raise AppError(403, "forbidden_origin", "Origin is not allowed.")
